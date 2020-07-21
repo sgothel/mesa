@@ -157,7 +157,17 @@ vlVaGetConfigAttributes(VADriverContextP ctx, VAProfile profile, VAEntrypoint en
             value = VA_RC_CQP | VA_RC_CBR | VA_RC_VBR;
             break;
          case VAConfigAttribEncPackedHeaders:
-            value = 0;
+            // FIXME: Query whether VA driver actually supports 
+            // writing/consuming these packed header!
+            // Seems to work on 
+            //   VAAPI driver: Mesa Gallium driver 20.2.0-devel for AMD Radeon RX 5700 XT (NAVI10, DRM 3.37.0, 5.7.0-1-amd64, LLVM 9.0.1)
+            // using h264_vaapi, dunno which VCN radeon code hook is being used here.
+            // This enables h264 encoding having conforming frame header and hence 
+            // allows validating muxer like Matroska (e.g. ffmpeg).
+            // See <https://trac.ffmpeg.org/ticket/8042>
+            value = VA_ENC_PACKED_HEADER_SEQUENCE | // SPS and PPS.
+                    VA_ENC_PACKED_HEADER_SLICE    | // Slice headers.
+                    VA_ENC_PACKED_HEADER_MISC;      // SEI.
             break;
          case VAConfigAttribEncMaxRefFrames:
             value = 1;
